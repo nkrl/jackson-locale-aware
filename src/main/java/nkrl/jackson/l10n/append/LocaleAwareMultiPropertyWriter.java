@@ -51,7 +51,21 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
 
             }*/
 
-            String key = prov.getConfig().getPropertyNamingStrategy().nameForGetterMethod(prov.getConfig(), annotatedMethod, "");;
+            // remove Java Bean accessor naming conventions if marked with @JsonGetter TODO unless renamed
+            if (annotatedMethod.hasAnnotation(JsonGetter.class)) {
+                String potentialKey = prov.getConfig().getAccessorNaming().forPOJO(prov.getConfig(), annotatedClass).findNameForIsGetter(annotatedMethod, key);
+                if (potentialKey == null) {
+                    potentialKey = prov.getConfig().getAccessorNaming().forPOJO(prov.getConfig(), annotatedClass).findNameForRegularGetter(annotatedMethod, key);
+                }
+                if (potentialKey != null) {
+                    key = potentialKey;
+                }
+            }
+
+            // adapt to configured property naming strategy
+            if (prov.getConfig().getPropertyNamingStrategy() != null) { // by default, property naming strategy is not set
+                key = prov.getConfig().getPropertyNamingStrategy().nameForGetterMethod(prov.getConfig(), annotatedMethod, key);
+            }
 
             Object result = annotatedMethod.getAnnotated().invoke(bean, prov.getLocale());
 
