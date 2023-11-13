@@ -47,6 +47,16 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
                 continue;
             }
 
+            String key;
+            PropertyName renamed = prov.getAnnotationIntrospector().findNameForSerialization(annotatedMethod);
+            if (renamed.equals(PropertyName.USE_DEFAULT)) {
+                key = annotatedMethod.getName();
+            }
+            else {
+                // property was renamed in annotation
+                key = renamed.getSimpleName();
+            }
+            // TODO only != "" if renamed
             /*if (annotatedMethod.hasAnnotation(JsonProperty.class)) {
                 annotatedMethod.getName()
             }
