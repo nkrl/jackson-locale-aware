@@ -1,4 +1,4 @@
-package nkrl.jackson.l10n;
+package nkrl.jackson.l10n.append;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,14 +10,13 @@ import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.*;
 import com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter;
 import com.fasterxml.jackson.databind.util.Annotations;
-import com.fasterxml.jackson.databind.util.BeanUtil;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
 
 /**
  * A hacky property writer that appends all localized properties of a bean marked with @JsonProperty or @JsonGetter.
- *
+ * <p>
  * Note that even though VirtualBeanPropertyWriters are intended for appending a single virtual attribute,
  * we are using it to append multiple attributes.
  */
@@ -40,9 +39,13 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
         /*
         === ALT ===
         */
-        AnnotatedClass annotatedClass = AnnotatedClassResolver.resolveWithoutSuperTypes(prov.getConfig(), bean.getClass());
+        //AnnotatedClass annotatedClass = AnnotatedClassResolver.resolveWithoutSuperTypes(prov.getConfig(), bean.getClass());
+        AnnotatedClass annotatedClass = AnnotatedClassResolver.resolve(prov.getConfig(), prov.constructType(bean.getClass()), prov.getConfig());
         for (AnnotatedMethod annotatedMethod : annotatedClass.memberMethods()) {
-            PropertyName name = prov.getAnnotationIntrospector().findNameForSerialization(annotatedMethod);
+            if (annotatedMethod.getParameterCount() != 1 || !annotatedMethod.getParameterType(0).hasRawClass(Locale.class)) {
+                // we do not need to check for parameters inheriting from Locale because the class is final
+                continue;
+            }
 
             /*if (annotatedMethod.hasAnnotation(JsonProperty.class)) {
                 annotatedMethod.getName()
@@ -77,7 +80,7 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
          */
 
         // call next annotated methods with reflection and return its return value
-        for (Method method : bean.getClass().getDeclaredMethods()) {
+        /*for (Method method : bean.getClass().getDeclaredMethods()) {
             String key;
             if (method.isAnnotationPresent(JsonProperty.class)) {
                 key = method.getAnnotation(JsonProperty.class).value();
@@ -106,9 +109,9 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
             Object result = method.invoke(bean, prov.getLocale());
             json.writeFieldName(key);
             prov.findValueSerializer(result.getClass()).serialize(result, json, prov);
-            /*json.writeFieldName(key);
-            json.writeString(result.toString());*/
-        }
+            //json.writeFieldName(key);
+            //json.writeString(result.toString());
+        }*/
 
         /*
          Usually we would have to return the attribute value to serialize here. Note that
