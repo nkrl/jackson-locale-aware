@@ -21,17 +21,19 @@ import java.util.Locale;
  * we are using it to append multiple attributes.
  */
 public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
-
-    private Locale locale = Locale.getDefault();
+    /**
+     * The bean that is marked with @JsonLocaleAware.
+     */
+    private AnnotatedClass localeAwareBean;
 
     /**
      * Jackson uses this default constructor to instantiate this property writer.
      */
     public LocaleAwareMultiPropertyWriter() {}
 
-    protected LocaleAwareMultiPropertyWriter(Locale locale, BeanPropertyDefinition propDef, Annotations contextAnnotations, JavaType declaredType) {
+    protected LocaleAwareMultiPropertyWriter(AnnotatedClass localeAwareBean, BeanPropertyDefinition propDef, Annotations contextAnnotations, JavaType declaredType) {
         super(propDef, contextAnnotations, declaredType);
-        this.locale = locale;
+        this.localeAwareBean = localeAwareBean;
     }
 
     @Override
@@ -39,9 +41,7 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
         /*
         === ALT ===
         */
-        //AnnotatedClass annotatedClass = AnnotatedClassResolver.resolveWithoutSuperTypes(prov.getConfig(), bean.getClass());
-        AnnotatedClass annotatedClass = AnnotatedClassResolver.resolve(prov.getConfig(), prov.constructType(bean.getClass()), prov.getConfig());
-        for (AnnotatedMethod annotatedMethod : annotatedClass.memberMethods()) {
+        for (AnnotatedMethod annotatedMethod : localeAwareBean.memberMethods()) {
             if (annotatedMethod.getParameterCount() != 1 || !annotatedMethod.getParameterType(0).hasRawClass(Locale.class)) {
                 // we do not need to check for parameters inheriting from Locale because the class is final
                 continue;
@@ -134,6 +134,6 @@ public class LocaleAwareMultiPropertyWriter extends VirtualBeanPropertyWriter {
     public VirtualBeanPropertyWriter withConfig(MapperConfig<?> config, AnnotatedClass declaringClass, BeanPropertyDefinition propDef, JavaType type) {
         // declaring class is entity, propDef is nameless SimpleBeanPropertyDefinition with VirtualAnnotatedMember
 
-        return new LocaleAwareMultiPropertyWriter(locale, propDef, declaringClass.getAnnotations(), type);
+        return new LocaleAwareMultiPropertyWriter(declaringClass, propDef, declaringClass.getAnnotations(), type);
     }
 }
