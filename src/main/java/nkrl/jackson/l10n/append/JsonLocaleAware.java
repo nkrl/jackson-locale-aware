@@ -16,6 +16,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @JsonAppend(props = @JsonAppend.Prop(value = LocaleAwareMultiPropertyWriter.class))
-//@JsonSerialize()
 public @interface JsonLocaleAware {
 }
