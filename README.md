@@ -24,7 +24,7 @@ In your _pom.xml_, you need to depend on this artifact as well as Jackson:
         <dependency>
             <groupId>io.github.nkrl</groupId>
             <artifactId>jackson-locale-aware</artifactId>
-            <version>1.0.0</version>
+            <version>RELEASE</version>
         </dependency>
         
         <dependency>
