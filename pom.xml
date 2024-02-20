@@ -6,7 +6,7 @@
 
     <groupId>io.github.nkrl</groupId>
     <artifactId>jackson-locale-aware</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
